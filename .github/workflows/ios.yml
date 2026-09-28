@@ -17,13 +17,14 @@ jobs:
       IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
       IOS_SIGNING_IDENTITY: ${{ secrets.IOS_SIGNING_IDENTITY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
       - uses: ruby/setup-ruby@v1
         with:
+          ruby-version: '3.3'
           bundler-cache: true
       - run: npm ci
       - run: npm run verify

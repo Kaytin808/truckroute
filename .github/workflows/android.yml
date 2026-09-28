@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      HAULSAFE_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      HAULSAFE_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      HAULSAFE_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,19 +31,14 @@ jobs:
       - run: npm run verify
 
       - name: Restore private Android signing key
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
         working-directory: android/app
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > haulsafe-release.keystore
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > haulsafe-release.keystore
+          echo "HAULSAFE_UPLOAD_STORE_FILE=haulsafe-release.keystore" >> "$GITHUB_ENV"
 
       - name: Build release APK
         working-directory: android
-        env:
-          HAULSAFE_UPLOAD_STORE_FILE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && 'haulsafe-release.keystore' || '' }}
-          HAULSAFE_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          HAULSAFE_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          HAULSAFE_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK

@@ -40,5 +40,10 @@ target 'HaulSafe' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # MapLibre React Native v11 distributes MapLibre Native through Swift
+    # Package Manager. Its post-install hook attaches that package to both the
+    # pod target and the app target so <MapLibre/MapLibre.h> is available.
+    $MLRN.post_install(installer)
   end
 end
